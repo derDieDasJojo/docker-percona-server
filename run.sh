@@ -22,6 +22,7 @@ if [ ! -f /data/db/.mongodb_password_set ]; then
 fi
 
 if [ -z "$REMOTE_HOST"]; then
+    echo "adding remote folder.."
     sshfs -o nonempty $REMOTE_USER@$REMOTE_HOST:/$REMOTE_PATH /backup
 fi
 
