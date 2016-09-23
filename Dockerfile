@@ -12,4 +12,8 @@ ADD set_mongodb_password.sh /set_mongodb_password.sh
 
 EXPOSE 27017 28017
 
+ENV STORAGE_ENGINE rocksdb
+ENV AUTH yes
+ENV JOURNALING no
+
 CMD ["/run.sh"]

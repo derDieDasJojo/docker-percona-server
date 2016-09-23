@@ -22,3 +22,6 @@ if [ ! -f /data/db/.mongodb_password_set ]; then
 fi
 
 fg
+#kill $!
+#cmd="$cmd"
+#$cmd
