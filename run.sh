@@ -15,6 +15,20 @@ if [ "$OPLOG_SIZE" != "" ]; then
     cmd="$cmd --oplogSize $OPLOG_SIZE"
 fi
 
+#connect sshfs
+if [ ! -z "$REMOTE_HOST" ]; then
+    until nc -z $REMOTE_HOST 22
+    do
+        echo "waiting for sshfs server..."
+        sleep 1
+    done
+
+    sleep 2
+    echo "mounting remote backup folder .."
+    echo sshfs -o nonempty -o StrictHostKeyChecking=no -o sshfs_debug -o password_stdin -o reconnect -o auto_unmount $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH /backup
+    echo $REMOTE_PASS | sshfs -o nonempty -o StrictHostKeyChecking=no -o sshfs_debug -o password_stdin -o reconnect -o auto_unmount $REMOTE_USER@$REMOTE_HOST:/$REMOTE_PATH /backup && echo "=> successfully mounted" || echo "=> failed mounting!"
+fi
+
 #start chronjobs
 if [ "$BACKUPS" != "no" ]; then
     crontab  /crontab.conf &
@@ -24,30 +38,26 @@ fi
 $cmd &
 
 if [ "$MONGODB_PASS" != "" ]; then
-    echo "=> Creating an ${USER} user with a password in MongoDB"
-    mongo admin --eval "db.createUser({user: '$USER', pwd: '$MONGODB_PASS', roles:[{role:'root',db:'admin'}]});"
-    mongo admin --eval "db.createUser({user: '$USER', pwd: '$MONGODB_PASS', roles: [ "dbOwner" ]});"
-    mongo admin --eval "db.createUser({user: '$USER', pwd: '$MONGODB_PASS', roles: [{ role: "root", db: "admin" }] }); "
+    echo "=> Creating an ${MONGODB_USER} user with a password in MongoDB"
+    mongo admin --eval "db.createUser({user: '$MONGODB_USER', pwd: '$MONGODB_PASS', roles:[{role:'root',db:'admin'}]});"
+    mongo admin --eval "db.createUser({user: '$MONGODB_USER', pwd: '$MONGODB_PASS', roles: [ "dbOwner" ]});"
+    mongo admin --eval "db.createUser({user: '$MONGODB_USER', pwd: '$MONGODB_PASS', roles: [{ role: "root", db: "admin" }] }); "
 
     if [ "$DATABASE" != "admin" ]; then
         echo "=> Creating an ${USER} user with a password in MongoDB"
-        mongo admin -u $USER -p $MONGODB_PASS << EOF
+        mongo admin -u $MONGODB_USER -p $MONGODB_PASS << EOF
 use $DATABASE
-db.createUser({user: '$USER', pwd: '$MONGODB_PASS', roles:[{role:'dbOwner',db:'$DATABASE'}]})
+db.createUser({user: '$MONGODB_USER', pwd: '$MONGODB_PASS', roles:[{role:'dbOwner',db:'$DATABASE'}]})
 EOF
     fi
     touch /data/db/.mongodb_password_set
 
     echo "========================================================================"
     echo "You can now connect to this MongoDB server using:"
-    echo "    mongo $DATABASE -u $USER -p $MONGODB_PASS --host <host> --port <port>"
+    echo "    mongo $DATABASE -u $MONGODB_USER -p $MONGODB_PASS --host <host> --port <port>"
     echo "========================================================================"
 fi
 
-if [ -z "$REMOTE_HOST"]; then
-    echo "adding remote folder.."
-    sshfs -o nonempty $REMOTE_USER@$REMOTE_HOST:/$REMOTE_PATH /backup
-fi
 
 if [ -n "${INIT_BACKUP}" ]; then
     echo "=> Create a backup on the startup"

@@ -1,0 +1,8 @@
+#how to prepare in core1
+```
+sudo rm /etc/ssh/sshd_config
+sudo echo PasswordAuthentication yes >> /etc/ssh/sshd_config
+sudo echo Subsystem sftp internal-sftp >> /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+```
