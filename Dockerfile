@@ -10,21 +10,23 @@ RUN adduser root fuse
 VOLUME /data/db
 VOLUME /backup
 
-ADD run.sh /run.sh
-ADD set_mongodb_password.sh /set_mongodb_password.sh
-ADD backup.sh /backup.sh
-EXPOSE 27017 28017
-
 ENV STORAGE_ENGINE rocksdb
 ENV AUTH yes
 ENV JOURNALING no
 ENV REMOTE_HOST "" 
-CMD ["/run.sh"]
-
 ENV MAX_BACKUPS=10
 ENV INIT_BACKUP=yes
 ENV MONGODB_HOST=localhost
 ENV MONGODB_PORT=27017
+ENV MONGODB_DATABASE=admin
+ENV MONGODB_USER=admin
+ENV MONGODB_PASS=""
 ENV SUBFOLDER=openparse
+ENV BACKUPS=yes
 ENV CRON_TIME="0 0 * * *"
 
+EXPOSE 27017 28017
+CMD ["/run.sh"]
+
+ADD run.sh /run.sh
+ADD backup.sh /backup.sh
