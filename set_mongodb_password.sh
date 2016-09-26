@@ -15,6 +15,8 @@ done
 
 echo "=> Creating an ${USER} user with a ${_word} password in MongoDB"
 mongo admin --eval "db.createUser({user: '$USER', pwd: '$PASS', roles:[{role:'root',db:'admin'}]});"
+#mongo admin --eval "db.createUser({user: '$USER', pwd: '$PASS', roles: [ "dbOwner" ]});" 
+#mongo admin --eval "db.createUser({user: '$USER', pwd: '$PASS', roles: [{ role: "root", db: "admin" }] }); "
 
 if [ "$DATABASE" != "admin" ]; then
     echo "=> Creating an ${USER} user with a ${_word} password in MongoDB"
@@ -23,6 +25,10 @@ use $DATABASE
 db.createUser({user: '$USER', pwd: '$PASS', roles:[{role:'dbOwner',db:'$DATABASE'}]})
 EOF
 fi
+
+
+
+
 
 echo "=> Done!"
 touch /data/db/.mongodb_password_set
