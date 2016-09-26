@@ -9,7 +9,15 @@ VOLUME /data/db
 
 ADD run.sh /run.sh
 ADD set_mongodb_password.sh /set_mongodb_password.sh
-
+ADD backup.sh /backup.sh
 EXPOSE 27017 28017
 
 CMD ["/run.sh"]
+
+ENV MAX_BACKUPS=10
+ENV INIT_BACKUP=yes
+ENV MONGODB_HOST=localhost
+ENV MONGODB_PORT=27017
+ENV SUBFOLDER=openparse
+ENV CRON_TIME="0 0 * * *"
+
